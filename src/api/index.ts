@@ -1,14 +1,4 @@
-type Job = {
-  id: string
-  name: string
-}
-
-export type Candidate = {
-  id: number
-  email: string
-  status: 'new' | 'interview' | 'hired' | 'rejected'
-  position: number
-}
+import { Candidate, Job } from "../types"
 
 export const getJobs = async (): Promise<Job[]> => {
   const response = await fetch(`http://localhost:4000/api/jobs`)

@@ -1,15 +1,15 @@
-import { useParams } from 'react-router-dom'
-import { useJob, useCandidates } from '../../hooks'
-import { Text } from '@welcome-ui/text'
-import { Flex } from '@welcome-ui/flex'
-import { Box } from '@welcome-ui/box'
-import { useMemo } from 'react'
-import { Candidate } from '../../api'
-import CandidateCard from '../../components/Candidate'
-import { Badge } from '@welcome-ui/badge'
+import { useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 
-type Statuses = 'new' | 'interview' | 'hired' | 'rejected'
-const COLUMNS: Statuses[] = ['new', 'interview', 'hired', 'rejected']
+import { Text } from '@welcome-ui/text';
+import { Flex } from '@welcome-ui/flex';
+import { Box } from '@welcome-ui/box';
+import { Badge } from '@welcome-ui/badge';
+
+import { useJob, useCandidates } from '../../hooks';
+import { Candidate } from '../../types';
+import CandidateCard from '../../components/Candidate';
+import { COLUMNS } from '../../constants';
 
 interface SortedCandidates {
   new?: Candidate[]
