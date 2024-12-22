@@ -1,5 +1,6 @@
-import { Card } from '@welcome-ui/card'
-import { Candidate } from '../../api'
+import { Card } from '@welcome-ui/card';
+
+import { Candidate } from '../../types';
 
 function CandidateCard({ candidate }: { candidate: Candidate }) {
   return (
@@ -9,4 +10,4 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
   )
 }
 
-export default CandidateCard
+export default CandidateCard;

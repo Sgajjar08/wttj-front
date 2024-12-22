@@ -1,12 +1,14 @@
-import { Link as RouterLink } from 'react-router-dom'
-import { useJobs } from '../../hooks'
-import { Link } from '@welcome-ui/link'
+import { Link as RouterLink } from 'react-router-dom';
+import { Link } from '@welcome-ui/link';
+
+import { useJobs } from '../../hooks';
+
 
 function JobIndex() {
-  const { isLoading, jobs } = useJobs()
+  const { isLoading, jobs } = useJobs();
 
   if (isLoading) {
-    return null
+    return null;
   }
 
   return (
@@ -22,4 +24,4 @@ function JobIndex() {
   )
 }
 
-export default JobIndex
+export default JobIndex;
