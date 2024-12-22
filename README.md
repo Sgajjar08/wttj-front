@@ -1,50 +1,122 @@
-# wttj-front
+# WTTJ Front
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Pre-requisite
 
-Currently, two official plugins are available:
+### Install PostgreSQL
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Install PostgreSQL. Optionally, you can use pgAdmin to have a visual interface for managing data.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Installation Guide
 
-- Configure the top-level `parserOptions` property like this:
+### 1. Install `asdf`
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+To install `asdf`, refer to the [official asdf documentation](https://asdf-vm.com/guide/getting-started.html) and follow the instructions for your system. `asdf` is required to manage plugins such as Elixir, Erlang, Node.js, and PostgreSQL. These plugins will help set up the database and backend server.
+
+### 2. Add Plugins Using `asdf`
+
+Run the following commands to add the required plugins:
+
+```bash
+asdf plugin add elixir
+asdf plugin add erlang
+asdf plugin add nodejs
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+If you encounter errors with `asdf` commands, try running the following commands before adding the plugins:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```bash
+. "$HOME/.asdf/asdf.sh"
+export PATH=$PATH:/usr/local/lib/elixir/1.13.2-otp-24/bin
 ```
+
+### 3. Install Plugins
+
+Run the following command to ensure all plugins are installed with the correct versions:
+
+```bash
+asdf install
+```
+
+---
+
+## Getting Started
+
+### 1. Set Up the Phoenix Server
+
+Run the following commands to set up and start the Phoenix server:
+
+1. **Install and set up dependencies:**
+   ```bash
+   mix setup
+   ```
+   This command will also create a database with two jobs (one of which has many candidates).
+
+2. **Start the Phoenix endpoint:**
+   ```bash
+   mix phx.server
+   ```
+   Alternatively, you can start it inside `IEx`:
+   ```bash
+   iex -S mix phx.server
+   ```
+
+### 2. Install and Start Frontend Assets
+
+Navigate to the `assets` directory and run the following commands:
+
+```bash
+cd assets
+yarn
+yarn dev
+```
+
+---
+
+## Handling CORS Errors
+
+If you encounter CORS (Cross-Origin Resource Sharing) errors, you need to add a CORS plug in the backend to accept requests from the frontend running on localhost.
+
+1. **Create a CORS plug** in `lib/wttj_web/plugs/cors.ex`:
+
+   ```elixir
+   defmodule WttjWeb.Plugs.CORS do
+     import Plug.Conn
+
+     def init(opts), do: opts
+
+     def call(conn, _opts) do
+       conn
+       |> put_resp_header("access-control-allow-origin", "http://localhost:5173") # Adjust the origin as necessary for production
+       |> put_resp_header("access-control-allow-methods", "GET, POST, PUT, DELETE, OPTIONS")
+       |> put_resp_header("access-control-allow-headers", "content-type, authorization")
+     end
+   end
+   ```
+
+2. **Add the CORS plug to the `api` pipeline** in `lib/wttj_web/router.ex`:
+
+   ```elixir
+   pipeline :api do
+     plug :accepts, ["json"]
+     plug WttjWeb.Plugs.CORS
+   end
+   ```
+
+3. **Restart the server**:
+   ```bash
+   mix phx.server
+   ```
+   After restarting, the CORS issues should be resolved.
+
+---
+
+## Notes
+
+- Adjust the `access-control-allow-origin` header in production as necessary to ensure proper security.
+- For further assistance, consult the project documentation or contact the development team.
+
+---
+
+Enjoy working with the WTTJ Front repository!
