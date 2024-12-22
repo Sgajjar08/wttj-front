@@ -104,7 +104,30 @@ If you encounter CORS (Cross-Origin Resource Sharing) errors, you need to add a 
    end
    ```
 
-3. **Restart the server**:
+3. **Define the Options function** in the PageController `lib/wttj_web/controllers/page_controller.ex` and use it for routers `JobController` and `CandidateController`:
+
+   ```elixir
+   def options(conn, _params) do
+     conn
+     |> send_resp(204, "")
+   end
+   ```
+
+   in router.ex
+
+   ```elixir
+   scope "/api", WttjWeb do
+     pipe_through :api
+
+     resources "/jobs", JobController, except: [:new, :edit] do
+       resources "/candidates", CandidateController, except: [:new, :edit]
+
+     options "/*path", PageController, :options
+     end
+   end
+   ```
+
+4. **Restart the server**:
    ```bash
    mix phx.server
    ```

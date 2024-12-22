@@ -14,6 +14,11 @@ type Statuses = 'new' | 'interview' | 'hired' | 'rejected';
 
 type Candidates = {
     [key in Statuses]: Candidate[];
-  } | undefined;
+} | undefined;
 
-export { type Job, type Candidate, type Statuses, type Candidates};
+type UpdateCandidateStatusPayload = {
+    jobId?: string,
+    candidate: Candidate,
+}
+
+export type { Job, Candidate, Statuses, Candidates, UpdateCandidateStatusPayload};
