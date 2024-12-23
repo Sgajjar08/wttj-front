@@ -1,10 +1,10 @@
 import { Card } from '@welcome-ui/card';
 
-import { Candidate, Statuses } from '../../types';
+import { Candidate } from '../../types';
 
 type Props = {
   candidate: Candidate,
-  handleDragStart?: (e: React.DragEvent, id: number, status: Statuses) => void;
+  handleDragStart?: (e: React.DragEvent) => void;
   handleDragOver?: (e: React.DragEvent) => void;
   handleDragEnd?: (e: React.DragEvent) => void;
 }
@@ -16,7 +16,7 @@ function CandidateCard({ candidate, handleDragEnd, handleDragOver, handleDragSta
       mb={10}
       tabIndex={0}
       role='listitem'
-      onDragStart={(e) => handleDragStart?.(e, candidate.id, candidate.status)} 
+      onDragStart={handleDragStart} 
       onDragEnd={handleDragEnd} 
       onDragOver={handleDragOver}
     >

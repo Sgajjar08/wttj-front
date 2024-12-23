@@ -9,9 +9,9 @@ import CandidateCard from '../Candidate';
 interface CandidateColumnProps {
   column: Statuses;
   candidates: Candidate[];
-  handleDragStart: (e: React.DragEvent<Element>, candidateId: number, sourceColumn: Statuses) => void;
+  handleDragStart: (e: React.DragEvent<Element>, candidate: Candidate) => void;
   handleDragEnd: (e: React.DragEvent<Element>) => void;
-  handleDragOver: (e: React.DragEvent<Element>) => void;
+  handleDragOver: (e: React.DragEvent<Element>, targetIndex: string) => void;
   handleDrop: (e: React.DragEvent<Element>) => void;
 }
 
@@ -40,13 +40,13 @@ const CandidateColumn = ({
       <Badge>{candidates.length}</Badge>
     </Flex>
     <Flex direction="column" p={10} pb={0}>
-      {candidates.map((candidate: Candidate) => (
+      {candidates.map((candidate: Candidate, index: number) => (
         <CandidateCard
           key={candidate.id}
           candidate={candidate}
-          handleDragStart={handleDragStart}
+          handleDragStart={(e) => handleDragStart(e, candidate)}
           handleDragEnd={handleDragEnd}
-          handleDragOver={handleDragOver}
+          handleDragOver={(e) => handleDragOver(e, index.toString())}
         />
       ))}
     </Flex>

@@ -1,8 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useMutation, useQuery } from 'react-query';
+import { useParams } from 'react-router-dom';
+import { Socket } from 'phoenix';
 
 import { getCandidates, getJob, getJobs, updateCandidateStatus } from '../api';
-import { Candidates, Statuses, UpdateCandidateStatusPayload } from '../types';
+import { Candidate, Candidates, Statuses, UpdateCandidateStatusPayload } from '../types';
 
 export const useJobs = () => {
   const { isLoading, error, data } = useQuery({
@@ -44,54 +46,57 @@ export const useUpdateCandidateStatus = () => {
 
 export const useDragAndDrop = () => {
   const { updateCandidateStatusMutation } = useUpdateCandidateStatus();
-  const [draggedCandidate, setDraggedCandidate] = useState<{
-    jobId: string;
-    candidateId: number;
-    sourceColumn: Statuses;
-    targetColumn: Statuses | null;
-  } | null>(null);
+  const [draggedCandidate, setDraggedCandidate] = useState<Candidate | null>(null);
+  const [hoverIndex, setHoverIndex] = useState<string | null>(null);
+  const { jobId } = useParams();
 
   const handleDragStart = useCallback(
-    (e: React.DragEvent<Element>, candidateId: number, sourceColumn: Statuses, jobId: string) => {
+    (e: React.DragEvent<Element>, candidate: Candidate) => {
       e.dataTransfer.effectAllowed = 'move';
-      setDraggedCandidate({ candidateId, sourceColumn, jobId, targetColumn: null });
+      setDraggedCandidate(candidate);
       (e.target as HTMLElement).setAttribute('aria-grabbed', 'true');
     },
     []
   );
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const handleDragOver = useCallback((e: React.DragEvent, targetIndex: string) => {
     e.preventDefault();
-  }, []);
+    if(!draggedCandidate) return;
+    setHoverIndex(targetIndex);
+  }, [draggedCandidate]);
 
   const handleDrop = useCallback(
-    (e: React.DragEvent<Element>, targetColumn: Statuses) => {
+    (e: React.DragEvent<Element>, candidates: Candidates, targetColumn: Statuses) => {
       e.preventDefault();
-      if (!draggedCandidate) return;
-      setDraggedCandidate({ ...draggedCandidate, targetColumn });
+
+      if (!draggedCandidate || !candidates || !hoverIndex || !targetColumn) return;
+
+      const { id, status } = draggedCandidate;
+      const candidate = candidates[status].find(candidate => candidate.id === id);
+
+      if (!candidate) return;
+
+      if (candidate.id !== candidates[status][+hoverIndex].id) {
+        candidate.position = candidates[status][+hoverIndex].position - 1
+      }
+
+      updateCandidateStatusMutation({
+        jobId: jobId,
+        candidate: { ...candidate, status: targetColumn },
+      });
+      setDraggedCandidate(null);
+      setHoverIndex(null);
     },
-    [draggedCandidate]
+    [updateCandidateStatusMutation, draggedCandidate, hoverIndex]
   );
 
   const handleDragEnd = useCallback(
-    (e: React.DragEvent<Element>, candidates: Candidates) => {
+    (e: React.DragEvent<Element>) => {
       (e.target as HTMLElement).setAttribute('aria-grabbed', 'false');
-
-      if (!draggedCandidate || !candidates) return;
-
-      const { candidateId, sourceColumn, targetColumn } = draggedCandidate;
-      const candidate = candidates[sourceColumn]?.find(candidate => candidate.id === candidateId);
-
-      if (!candidate || sourceColumn === targetColumn || !targetColumn) return; // Prevent unnecessary updates
-
-      updateCandidateStatusMutation({
-        jobId: draggedCandidate.jobId,
-        candidate: { ...candidate, status: targetColumn },
-      });
-
       setDraggedCandidate(null);
+      setHoverIndex(null);
     },
-    [draggedCandidate, updateCandidateStatusMutation]
+    []
   );
 
   return {
@@ -101,4 +106,47 @@ export const useDragAndDrop = () => {
     handleDrop,
     handleDragEnd
   };
+};
+
+export const useWebSocket = (onUpdate: (candidate: Candidate) => void, jobId?: string) => {
+  useEffect(() => {
+    const socket = new Socket('ws://localhost:4000/socket');
+    socket.connect();
+
+    const channel = socket.channel(`job:${jobId}`, {});
+
+    channel
+      .join()
+      .receive('ok', () => {
+        console.log(`Joined job channel for job ${jobId}`);
+      })
+      .receive('error', (resp) => {
+        console.error('Unable to join channel', resp);
+      });
+
+    channel.on('candidate:update', (response) => {
+      if (response) {
+        onUpdate(response.data);
+      }
+    });
+
+    socket.onError((error) => {
+      console.error('WebSocket error:', error);
+    });
+
+    // Retry logic for reconnection
+    const interval = setInterval(() => {
+      if (!socket.isConnected()) {
+        socket.connect();
+      }
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      channel.leave();
+      socket.disconnect();
+    };
+  }, [jobId, onUpdate]);
+
+  return null;
 };

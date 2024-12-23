@@ -3,7 +3,6 @@ import { Link } from '@welcome-ui/link';
 
 import { useJobs } from '../../hooks';
 
-
 function JobIndex() {
   const { isLoading, jobs } = useJobs();
 
