@@ -12,7 +12,7 @@ function JobIndex() {
 
   return (
     <ul>
-      {jobs?.map(job => (
+      {jobs?.map((job) => (
         <li>
           <Link as={RouterLink} to={`/jobs/${job.id}`}>
             {job.name}
@@ -20,7 +20,7 @@ function JobIndex() {
         </li>
       ))}
     </ul>
-  )
+  );
 }
 
 export default JobIndex;

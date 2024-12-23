@@ -1,8 +1,8 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-const assetsUrl = process.env.ASSETS_URL || 'http://localhost:5173'
+const assetsUrl = process.env.ASSETS_URL || 'http://localhost:5173';
 
 export default defineConfig({
   base: assetsUrl + '/',
@@ -17,4 +17,4 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
     minWorkers: 1,
   },
-})
+});

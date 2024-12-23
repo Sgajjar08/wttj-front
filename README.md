@@ -48,9 +48,11 @@ asdf install
 Run the following commands to set up and start the Phoenix server:
 
 1. **Install and set up dependencies:**
+
    ```bash
    mix setup
    ```
+
    This command will also create a database with two jobs (one of which has many candidates).
 
 2. **Start the Phoenix endpoint:**

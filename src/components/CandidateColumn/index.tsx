@@ -26,20 +26,19 @@ const CandidateColumn = ({
   <Box
     w={300}
     border={1}
-    backgroundColor="white"
-    borderColor="neutral-30"
-    borderRadius="md"
-    overflow="hidden"
+    backgroundColor='white'
+    borderColor='neutral-30'
+    borderRadius='md'
+    overflow='hidden'
     onDragOver={(e) => e.preventDefault()}
-    onDrop={handleDrop}
-  >
-    <Flex p={10} borderBottom={1} borderColor="neutral-30" alignItems="center" justify="space-between">
-      <Text color="black" m={0} textTransform="capitalize">
+    onDrop={handleDrop}>
+    <Flex p={10} borderBottom={1} borderColor='neutral-30' alignItems='center' justify='space-between'>
+      <Text color='black' m={0} textTransform='capitalize'>
         {column}
       </Text>
       <Badge>{candidates.length}</Badge>
     </Flex>
-    <Flex direction="column" p={10} pb={0}>
+    <Flex direction='column' p={10} pb={0}>
       {candidates.map((candidate: Candidate, index: number) => (
         <CandidateCard
           key={candidate.id}

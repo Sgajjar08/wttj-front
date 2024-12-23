@@ -1,10 +1,10 @@
-import { createTheme, WuiProvider } from '@welcome-ui/core'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import JobIndex from './pages/JobIndex'
-import Layout from './components/Layout'
-import JobShow from './pages/JobShow'
+import { createTheme, WuiProvider } from '@welcome-ui/core';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import JobIndex from './pages/JobIndex';
+import Layout from './components/Layout';
+import JobShow from './pages/JobShow';
 
-const theme = createTheme()
+const theme = createTheme();
 
 const router = createBrowserRouter([
   {
@@ -15,14 +15,14 @@ const router = createBrowserRouter([
       { path: 'jobs/:jobId', element: <JobShow /> },
     ],
   },
-])
+]);
 
 function App() {
   return (
     <WuiProvider theme={theme}>
       <RouterProvider router={router} />
     </WuiProvider>
-  )
+  );
 }
 
-export default App
+export default App;

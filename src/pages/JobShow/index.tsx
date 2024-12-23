@@ -5,17 +5,17 @@ import { Text } from '@welcome-ui/text';
 import { Flex } from '@welcome-ui/flex';
 import { Box } from '@welcome-ui/box';
 
-import { useJob, useCandidates, useDragAndDrop, useWebSocket } from '../../hooks';
-
+import { useJob, useCandidates } from '../../hooks';
 import { COLUMNS } from '../../constants';
 import CandidateColumn from '../../components/CandidateColumn';
 import { Candidates, Candidate } from '../../types';
+import { useDragAndDrop } from '../../hooks/useDragAndDrop';
+import { useWebSocket } from '../../hooks/useCandidate';
 
 // Reducer to manage candidates state
-type Action =
-  | { type: 'INITIALIZE'; payload: Candidates }
-  | { type: 'UPDATE_CANDIDATE'; payload: Candidate };
+type Action = { type: 'INITIALIZE'; payload: Candidates } | { type: 'UPDATE_CANDIDATE'; payload: Candidate };
 
+// TODO: needs to refactor to make drag and drop in same column
 const candidatesReducer = (state: Candidates | undefined, action: Action): Candidates => {
   switch (action.type) {
     case 'INITIALIZE':
@@ -26,14 +26,11 @@ const candidatesReducer = (state: Candidates | undefined, action: Action): Candi
 
       // Remove from the previous column
       for (const column of COLUMNS) {
-        updatedCandidates[column] = updatedCandidates[column]?.filter(candidate => candidate.id !== id);
+        updatedCandidates[column] = updatedCandidates[column]?.filter((candidate) => candidate.id !== id);
       }
 
-      // Add to the new column
-      updatedCandidates[status] = [
-        ...(updatedCandidates[status] || []),
-        action.payload,
-      ];
+      // Add to the new column and sort for position
+      updatedCandidates[status] = [...(updatedCandidates[status] || []), action.payload].sort((a, b) => a.position - b.position);
 
       return updatedCandidates as Candidates;
     }
@@ -57,27 +54,24 @@ function JobShow() {
     }
   }, [initialCandidates]);
 
-  useWebSocket(
-    (updatedCandidate: Candidate) => {
-      dispatch({ type: 'UPDATE_CANDIDATE', payload: updatedCandidate });
-    },
-    jobId
-  );
+  useWebSocket((updatedCandidate: Candidate) => {
+    dispatch({ type: 'UPDATE_CANDIDATE', payload: updatedCandidate });
+  }, jobId);
   return (
     <>
-      <Box backgroundColor="neutral-70" p={20} alignItems="center">
-        <Text variant="h5" color="white" m={0}>
+      <Box backgroundColor='neutral-70' p={20} alignItems='center'>
+        <Text variant='h5' color='white' m={0}>
           {job?.name}
         </Text>
       </Box>
 
       <Box p={20}>
         <Flex gap={10}>
-          {COLUMNS.map(column => (
+          {COLUMNS.map((column) => (
             <CandidateColumn
               key={column}
               column={column}
-              candidates={candidates?.[column] ||	[]}
+              candidates={candidates?.[column] || []}
               handleDragStart={(e, candidate) => handleDragStart(e, candidate)}
               handleDragOver={(e, index) => handleDragOver(e, index)}
               handleDrop={(e) => handleDrop(e, candidates, column)}
@@ -87,7 +81,7 @@ function JobShow() {
         </Flex>
       </Box>
     </>
-  )
+  );
 }
 
 export default JobShow;
