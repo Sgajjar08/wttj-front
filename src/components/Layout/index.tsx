@@ -5,7 +5,7 @@ import { Link as RouterLink, Outlet } from 'react-router-dom';
 
 function Layout() {
   return (
-    <Box backgroundColor='beige-20' h='100%'>
+    <Box backgroundColor='beige-20' h='100vh'>
       <Box backgroundColor='black' p={20}>
         <Flex>
           <Link as={RouterLink} to='/' color='white'>

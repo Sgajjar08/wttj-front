@@ -1,59 +1,23 @@
 import { useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient, QueryClient } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { Socket } from 'phoenix';
 
 import { getCandidates, updateCandidateStatus } from '../api';
-import { Candidate, Candidates, UpdateCandidateStatusPayload } from '../types';
+import { Candidate, Candidates } from '../types';
 import { COLUMNS } from '../constants';
-
-const updateCandidateData = (queryClient: QueryClient, updatedCandidate: Candidate, jobId?: string) => {
-  queryClient.setQueryData<Candidates>(['candidates', jobId], (oldData) => {
-    if (!oldData) return oldData;
-
-    const newData: Candidates = { ...oldData };
-
-    // Remove candidate from the old column
-    for (const column of COLUMNS) {
-      newData[column] = newData[column]?.filter((c) => c.id !== updatedCandidate.id);
-    }
-
-    // Add to the new column
-    const { status } = updatedCandidate;
-    newData[status] = [...(newData[status] || []), updatedCandidate];
-
-    return newData;
-  });
-};
 
 export const useCandidates = (jobId?: string) => {
   return useQuery(['candidates', jobId], () => getCandidates(jobId as string), { enabled: !!jobId });
 };
 
-export const useUpdateCandidateStatus = (jobId?: string) => {
+export const useUpdateCandidate = (jobId?: string) => {
   const queryClient = useQueryClient();
 
   return useMutation(updateCandidateStatus, {
-    onMutate: async (updatedCandidatePayload: UpdateCandidateStatusPayload) => {
-      await queryClient.cancelQueries(['candidates', jobId]);
-
-      const previousData = queryClient.getQueryData<Candidates>(['candidates', jobId]);
-
-      if (previousData) {
-        const updatedCandidate = updatedCandidatePayload.candidate;
-        updateCandidateData(queryClient, updatedCandidate, jobId);
-      }
-
-      return { previousData };
-    },
-
     onError: (context) => {
       if (context?.previousData) {
         queryClient.setQueryData(['candidates', jobId], context.previousData);
       }
-    },
-
-    onSettled: () => {
-      queryClient.invalidateQueries(['candidates', jobId]);
     },
   });
 };
@@ -82,7 +46,22 @@ export const useWebSocketForCandidates = (jobId?: string) => {
       const updatedCandidate: Candidate = response?.data;
 
       if (updatedCandidate) {
-        updateCandidateData(queryClient, updatedCandidate, jobId);
+        queryClient.setQueryData<Candidates>(['candidates', jobId], (oldData) => {
+          if (!oldData) return oldData;
+      
+          const newData: Candidates = { ...oldData };
+      
+          // Remove candidate from the old column
+          for (const column of COLUMNS) {
+            newData[column] = newData[column]?.filter((c) => c.id !== updatedCandidate.id);
+          }
+      
+          // Add to the new column
+          const { status } = updatedCandidate;
+          newData[status] = [...(newData[status] || []), updatedCandidate];
+      
+          return newData;
+        });
       }
     });
 
