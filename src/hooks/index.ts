@@ -1,7 +1,6 @@
-import { useMutation, useQuery } from 'react-query';
+import { useQuery } from 'react-query';
 
-import { getCandidates, getJob, getJobs, updateCandidateStatus } from '../api';
-import { UpdateCandidateStatusPayload } from '../types';
+import { getJob, getJobs } from '../api';
 
 export const useJobs = () => {
   const { isLoading, error, data } = useQuery({
@@ -20,24 +19,4 @@ export const useJob = (jobId?: string) => {
   });
 
   return { isLoading, error, job: data };
-};
-
-export const useCandidates = (jobId?: string) => {
-  const { isLoading, error, data } = useQuery({
-    queryKey: ['candidates', jobId],
-    queryFn: () => getCandidates(jobId),
-    enabled: !!jobId,
-  });
-
-  return { isLoading, error, candidates: data };
-};
-
-export const useUpdateCandidateStatus = () => {
-  const { mutate: updateCandidateStatusMutation, isSuccess } = useMutation({
-    mutationKey: ['updateCandidate'],
-    mutationFn: (updateCandidateStatusPayload: UpdateCandidateStatusPayload) =>
-      updateCandidateStatus(updateCandidateStatusPayload),
-  });
-
-  return { updateCandidateStatusMutation, isSuccess };
 };

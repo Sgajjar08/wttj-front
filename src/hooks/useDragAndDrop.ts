@@ -1,14 +1,12 @@
 import { useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
 
-import { useUpdateCandidateStatus } from '.';
 import { Candidate, Candidates, Statuses } from '../types';
+import { useUpdateCandidateStatus } from './useCandidate';
 
-export const useDragAndDrop = () => {
-  const { updateCandidateStatusMutation } = useUpdateCandidateStatus();
+export const useDragAndDrop = (jobId?: string) => {
+  const { mutate: updateCandidateStatusMutation } = useUpdateCandidateStatus(jobId);
   const [draggedCandidate, setDraggedCandidate] = useState<Candidate | null>(null);
   const [hoverIndex, setHoverIndex] = useState<string | null>(null);
-  const { jobId } = useParams();
 
   const handleDragStart = useCallback((e: React.DragEvent<Element>, candidate: Candidate) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -29,13 +27,11 @@ export const useDragAndDrop = () => {
     (e: React.DragEvent<Element>, candidates: Candidates, targetColumn: Statuses) => {
       e.preventDefault();
 
-      if (!draggedCandidate || !candidates || !targetColumn) return;
+      if (!draggedCandidate || !candidates || !targetColumn || !hoverIndex) return;
 
-      if (hoverIndex) {
-        const hoverCandidate = candidates[targetColumn][+hoverIndex];
-        if (hoverCandidate.position < draggedCandidate.position) {
-          draggedCandidate.position = hoverCandidate.position - 1;
-        }
+      const hoverCandidate = candidates[targetColumn][Number(hoverIndex)];
+      if (hoverCandidate && hoverCandidate.position < draggedCandidate.position) {
+        draggedCandidate.position = hoverCandidate.position - 1;
       }
 
       updateCandidateStatusMutation({

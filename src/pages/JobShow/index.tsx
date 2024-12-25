@@ -1,62 +1,24 @@
 import { useParams } from 'react-router-dom';
-import { useEffect, useReducer } from 'react';
 
 import { Text } from '@welcome-ui/text';
 import { Flex } from '@welcome-ui/flex';
 import { Box } from '@welcome-ui/box';
 
-import { useJob, useCandidates } from '../../hooks';
+import { useJob } from '../../hooks';
 import { COLUMNS } from '../../constants';
 import CandidateColumn from '../../components/CandidateColumn';
-import { Candidates, Candidate } from '../../types';
 import { useDragAndDrop } from '../../hooks/useDragAndDrop';
-import { useWebSocket } from '../../hooks/useCandidate';
-
-// Reducer to manage candidates state
-type Action = { type: 'INITIALIZE'; payload: Candidates } | { type: 'UPDATE_CANDIDATE'; payload: Candidate };
-
-// TODO: needs to refactor to make drag and drop in same column
-const candidatesReducer = (state: Candidates | undefined, action: Action): Candidates => {
-  switch (action.type) {
-    case 'INITIALIZE':
-      return action.payload;
-    case 'UPDATE_CANDIDATE': {
-      const { id, status } = action.payload;
-      const updatedCandidates = { ...state };
-
-      // Remove from the previous column
-      for (const column of COLUMNS) {
-        updatedCandidates[column] = updatedCandidates[column]?.filter((candidate) => candidate.id !== id);
-      }
-
-      // Add to the new column and sort for position
-      updatedCandidates[status] = [...(updatedCandidates[status] || []), action.payload].sort((a, b) => a.position - b.position);
-
-      return updatedCandidates as Candidates;
-    }
-    default:
-      return state;
-  }
-};
+import { useCandidates, useWebSocketForCandidates } from '../../hooks/useCandidate';
 
 function JobShow() {
   const { jobId } = useParams();
   const { job } = useJob(jobId);
-  const { candidates: initialCandidates } = useCandidates(jobId);
+  const { data: candidates } = useCandidates(jobId);
 
-  const [candidates, dispatch] = useReducer(candidatesReducer, undefined);
+  const { handleDragStart, handleDragOver, handleDrop, handleDragEnd } = useDragAndDrop(jobId);
 
-  const { handleDragStart, handleDragOver, handleDrop, handleDragEnd } = useDragAndDrop();
+  useWebSocketForCandidates(jobId);
 
-  useEffect(() => {
-    if (initialCandidates) {
-      dispatch({ type: 'INITIALIZE', payload: initialCandidates });
-    }
-  }, [initialCandidates]);
-
-  useWebSocket((updatedCandidate: Candidate) => {
-    dispatch({ type: 'UPDATE_CANDIDATE', payload: updatedCandidate });
-  }, jobId);
   return (
     <>
       <Box backgroundColor='neutral-70' p={20} alignItems='center'>
