@@ -1,24 +1,25 @@
 import { Card } from '@welcome-ui/card';
 
 import { Candidate } from '../../types';
+import { useDragAndDropContext } from '../../provider/dragAndDropProvider';
 
 type Props = {
   candidate: Candidate;
-  handleDragStart?: (e: React.DragEvent) => void;
-  handleDragOver?: (e: React.DragEvent) => void;
-  handleDragEnd?: (e: React.DragEvent) => void;
+  index?: number;
 };
 
-function CandidateCard({ candidate, handleDragEnd, handleDragOver, handleDragStart }: Props) {
+function CandidateCard({ candidate, index = 0 }: Props) {
+  const { handleDragStart, handleDragOver, handleDragEnd, draggedCandidate } = useDragAndDropContext();
   return (
     <Card
       draggable
       mb={10}
       tabIndex={0}
       role='listitem'
-      onDragStart={handleDragStart}
+      backgroundColor={draggedCandidate?.id === candidate.id ? 'beige-10' : 'neutral-10'}
+      onDragStart={(e) => handleDragStart(e, candidate)}
       onDragEnd={handleDragEnd}
-      onDragOver={handleDragOver}>
+      onDragOver={(e) => handleDragOver(e, index.toString())}>
       <Card.Body>{candidate.position}</Card.Body>
       <Card.Body>{candidate.email}</Card.Body>
     </Card>

@@ -6,8 +6,29 @@ import { getCandidates, updateCandidateStatus } from '../api';
 import { Candidate, Candidates, UpdateCandidateStatusPayload } from '../types';
 import { COLUMNS } from '../constants';
 
+const updateCandidateData = (updatedCandidate: Candidate, jobId?: string) => {
+  const queryClient = useQueryClient();
+
+  queryClient.setQueryData<Candidates>(['candidates', jobId], (oldData) => {
+    if (!oldData) return oldData;
+
+    const newData: Candidates = { ...oldData };
+
+    // Remove candidate from the old column
+    for (const column of COLUMNS) {
+      newData[column] = newData[column]?.filter((c) => c.id !== updatedCandidate.id);
+    }
+
+    // Add to the new column
+    const { status } = updatedCandidate;
+    newData[status] = [...(newData[status] || []), updatedCandidate];
+
+    return newData;
+  });
+};
+
 export const useCandidates = (jobId?: string) => {
-  return useQuery(['candidates', jobId], () => getCandidates(jobId));
+  return useQuery(['candidates', jobId], () => getCandidates(jobId as string), { enabled: !!jobId });
 };
 
 export const useUpdateCandidateStatus = (jobId?: string) => {
@@ -17,31 +38,11 @@ export const useUpdateCandidateStatus = (jobId?: string) => {
     onMutate: async (updatedCandidatePayload: UpdateCandidateStatusPayload) => {
       await queryClient.cancelQueries(['candidates', jobId]);
 
-      const previousData = queryClient.getQueryData<Candidates>([
-        'candidates',
-        jobId,
-      ]);
+      const previousData = queryClient.getQueryData<Candidates>(['candidates', jobId]);
 
       if (previousData) {
-        const newData: Candidates = { ...previousData };
         const updatedCandidate = updatedCandidatePayload.candidate;
-
-        // Remove candidate from its old column
-        for (const column of COLUMNS) {
-          newData[column] = newData[column]?.filter(
-            (c) => c.id !== updatedCandidate.id
-          );
-          newData[column] = newData[column]
-        }
-
-        // Add to the new column
-        const { status } = updatedCandidate;
-        newData[status] = [
-          ...(newData[status] || []),
-          { ...updatedCandidate },
-        ];
-
-        queryClient.setQueryData(['candidates', jobId], newData);
+        updateCandidateData(updatedCandidate, jobId);
       }
 
       return { previousData };
@@ -83,27 +84,7 @@ export const useWebSocketForCandidates = (jobId?: string) => {
       const updatedCandidate: Candidate = response?.data;
 
       if (updatedCandidate) {
-        queryClient.setQueryData<Candidates>(['candidates', jobId], (oldData) => {
-          if (!oldData) return oldData;
-
-          const newData: Candidates = { ...oldData };
-
-          // Remove candidate from the old column
-          for (const column of COLUMNS) {
-            newData[column] = newData[column]?.filter(
-              (c) => c.id !== updatedCandidate.id
-            );
-          }
-
-          // Add to the new column
-          const { status } = updatedCandidate;
-          newData[status] = [
-            ...(newData[status] || []),
-            updatedCandidate,
-          ];
-
-          return newData;
-        });
+        updateCandidateData(updatedCandidate, jobId);
       }
     });
 

@@ -1,5 +1,7 @@
 import { Link as RouterLink } from 'react-router-dom';
+
 import { Link } from '@welcome-ui/link';
+import { WelcomeLoader } from '@welcome-ui/welcome-loader';
 
 import { useJobs } from '../../hooks';
 
@@ -7,7 +9,7 @@ function JobIndex() {
   const { isLoading, jobs } = useJobs();
 
   if (isLoading) {
-    return null;
+    return <WelcomeLoader />;
   }
 
   return (

@@ -28,14 +28,17 @@
     ]
   },
   "dependencies": {
+    "@welcome-ui/alert": "^6.6.0",
     "@welcome-ui/badge": "^6.0.0",
     "@welcome-ui/box": "^6.0.0",
     "@welcome-ui/card": "^6.0.0",
     "@welcome-ui/core": "^6.0.0",
     "@welcome-ui/flex": "^6.0.0",
     "@welcome-ui/link": "^6.0.0",
+    "@welcome-ui/loader": "^6.4.0",
     "@welcome-ui/tag": "^6.0.0",
     "@welcome-ui/text": "^6.0.0",
+    "@welcome-ui/welcome-loader": "^6.4.0",
     "@xstyled/styled-components": "^4.0.0",
     "phoenix": "^1.7.18",
     "react": "^18.3.1",

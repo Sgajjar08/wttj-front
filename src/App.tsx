@@ -25,9 +25,9 @@ const queryClient = new QueryClient({
       retry: 5,
       staleTime: 1000 * 60 * 5,
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
-    }
-  }
-})
+    },
+  },
+});
 
 function App() {
   return (
