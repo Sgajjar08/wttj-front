@@ -1,14 +1,12 @@
 import { useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useQuery, useMutation, useQueryClient, QueryClient } from 'react-query';
 import { Socket } from 'phoenix';
 
 import { getCandidates, updateCandidateStatus } from '../api';
 import { Candidate, Candidates, UpdateCandidateStatusPayload } from '../types';
 import { COLUMNS } from '../constants';
 
-const updateCandidateData = (updatedCandidate: Candidate, jobId?: string) => {
-  const queryClient = useQueryClient();
-
+const updateCandidateData = (queryClient: QueryClient, updatedCandidate: Candidate, jobId?: string) => {
   queryClient.setQueryData<Candidates>(['candidates', jobId], (oldData) => {
     if (!oldData) return oldData;
 
@@ -42,7 +40,7 @@ export const useUpdateCandidateStatus = (jobId?: string) => {
 
       if (previousData) {
         const updatedCandidate = updatedCandidatePayload.candidate;
-        updateCandidateData(updatedCandidate, jobId);
+        updateCandidateData(queryClient, updatedCandidate, jobId);
       }
 
       return { previousData };
@@ -84,7 +82,7 @@ export const useWebSocketForCandidates = (jobId?: string) => {
       const updatedCandidate: Candidate = response?.data;
 
       if (updatedCandidate) {
-        updateCandidateData(updatedCandidate, jobId);
+        updateCandidateData(queryClient, updatedCandidate, jobId);
       }
     });
 
