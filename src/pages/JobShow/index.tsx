@@ -52,7 +52,7 @@ function JobShow() {
       <Box p={20} role='status'>
         <Flex gap={10} justifyContent='center'>
           {COLUMNS.map((column) => (
-            <CandidateColumn key={column} column={column} candidates={candidates} />
+            <CandidateColumn key={column} column={column}/>
           ))}
         </Flex>
       </Box>

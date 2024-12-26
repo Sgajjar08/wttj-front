@@ -3,13 +3,9 @@ import { Card } from '@welcome-ui/card';
 import { Candidate } from '../../types';
 import { useDragAndDropContext } from '../../provider/dragAndDropProvider';
 
-type Props = {
-  candidate: Candidate;
-  index?: number;
-};
+function CandidateCard({ candidate }: { candidate: Candidate }) {
+  const { handleDragStart, handleDragEnd, draggedCandidate } = useDragAndDropContext();
 
-function CandidateCard({ candidate, index = 0 }: Props) {
-  const { handleDragStart, handleDragOver, handleDragEnd, draggedCandidate } = useDragAndDropContext();
   return (
     <Card
       draggable
@@ -19,8 +15,7 @@ function CandidateCard({ candidate, index = 0 }: Props) {
       backgroundColor={draggedCandidate?.id === candidate.id ? 'beige-10' : 'neutral-10'}
       onDragStart={(e) => handleDragStart(e, candidate)}
       onDragEnd={handleDragEnd}
-      onDragOver={(e) => handleDragOver(e, index.toString())}>
-      <Card.Body>{candidate.position}</Card.Body>
+    >
       <Card.Body>{candidate.email}</Card.Body>
     </Card>
   );

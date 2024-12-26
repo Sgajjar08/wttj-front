@@ -7,8 +7,8 @@ import { Candidate, Candidates } from '../types';
 import { COLUMNS } from '../constants';
 
 export const useCandidates = (jobId?: string) => {
-  const {data, isError, isLoading} = useQuery(['candidates', jobId], () => getCandidates(jobId as string), { enabled: !!jobId });
-  return { data, isError, isLoading};
+  const { data, isError, isLoading } = useQuery(['candidates', jobId], () => getCandidates(jobId as string), { enabled: !!jobId });
+  return { data, isError, isLoading };
 };
 
 export const useUpdateCandidate = (jobId?: string) => {
@@ -46,24 +46,24 @@ export const useWebSocketForCandidates = (jobId?: string) => {
     channel.on('candidate:update', (response) => {
       const updatedCandidate: Candidate = response?.data;
 
-      if (updatedCandidate) {
-        queryClient.setQueryData<Candidates>(['candidates', jobId], (oldData) => {
-          if (!oldData) return oldData;
-      
-          const newData: Candidates = { ...oldData };
-      
-          // Remove candidate from the old column
-          for (const column of COLUMNS) {
-            newData[column] = newData[column]?.filter((c) => c.id !== updatedCandidate.id);
+      if (!updatedCandidate) return;
+
+      queryClient.setQueryData<Candidates>(['candidates', jobId], (oldCandidates) => {
+        if (!oldCandidates) return undefined;
+
+        const newCandidates: Candidates = { ...oldCandidates };
+        const { id, status } = updatedCandidate;
+
+        COLUMNS.forEach((column) => {
+          if (newCandidates[column]) {
+            newCandidates[column] = newCandidates[column].filter((c) => c.id !== id);
           }
-      
-          // Add to the new column
-          const { status } = updatedCandidate;
-          newData[status] = [...(newData[status] || []), updatedCandidate];
-      
-          return newData;
         });
-      }
+
+        newCandidates[status] = newCandidates[status].concat([updatedCandidate]).sort((a, b) => a.position - b.position);
+
+        return newCandidates;
+      });
     });
 
     socket.onError((error) => {

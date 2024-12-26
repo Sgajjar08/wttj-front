@@ -1,7 +1,8 @@
+import { Link as RouterLink, Outlet } from 'react-router-dom';
+
 import { Box } from '@welcome-ui/box';
 import { Flex } from '@welcome-ui/flex';
 import { Link } from '@welcome-ui/link';
-import { Link as RouterLink, Outlet } from 'react-router-dom';
 
 function Layout() {
   return (
