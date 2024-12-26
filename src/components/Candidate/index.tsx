@@ -14,8 +14,7 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
       role='listitem'
       backgroundColor={draggedCandidate?.id === candidate.id ? 'beige-10' : 'neutral-10'}
       onDragStart={(e) => handleDragStart(e, candidate)}
-      onDragEnd={handleDragEnd}
-    >
+      onDragEnd={handleDragEnd}>
       <Card.Body>{candidate.email}</Card.Body>
     </Card>
   );

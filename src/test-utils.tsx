@@ -23,9 +23,7 @@ export const AllTheProviders: FC<AllTheProvidersProps> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClientTest}>
       <WuiProvider theme={theme}>
-        <DragAndDropProvider>
-          {children}
-        </DragAndDropProvider>
+        <DragAndDropProvider>{children}</DragAndDropProvider>
       </WuiProvider>
     </QueryClientProvider>
   );

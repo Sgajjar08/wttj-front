@@ -44,7 +44,7 @@ describe('DragAndDropProvider', () => {
           dataTransfer: { effectAllowed: 'move' },
           target: { setAttribute: vi.fn() },
         } as unknown as React.DragEvent<Element>,
-        candidate
+        candidate,
       );
     });
 
@@ -54,7 +54,7 @@ describe('DragAndDropProvider', () => {
   test('handles drag over correctly', () => {
     const candidate: Candidate = { id: 1, email: 'test@example.com', status: 'new', position: 1 };
     const { result } = renderHook(() => useDragAndDropContext(), { wrapper: createWrapper() });
-  
+
     // Trigger drag start to set draggedCandidate
     act(() => {
       result.current.handleDragStart(
@@ -62,21 +62,21 @@ describe('DragAndDropProvider', () => {
           dataTransfer: { effectAllowed: 'move' },
           target: { setAttribute: vi.fn() },
         } as unknown as React.DragEvent<Element>,
-        candidate
+        candidate,
       );
     });
-  
+
     // Mocking the drag over event
     const mockEvent = { preventDefault: vi.fn() } as unknown as React.DragEvent;
-  
+
     // Call handleDragOver to handle the event (no direct state to check)
     act(() => {
       result.current.handleDragOver(mockEvent, 'new');
     });
-  
+
     // Check that the function was called correctly (this is more of a behavioral test)
     expect(mockEvent.preventDefault).toHaveBeenCalled();
-  }); 
+  });
 
   test('handles drop correctly', async () => {
     const candidate: Candidate = { id: 1, email: 'test@example.com', status: 'new', position: 1 };
@@ -86,20 +86,20 @@ describe('DragAndDropProvider', () => {
       hired: [],
       rejected: [],
     };
-  
+
     // Mocking the queryClient with realistic behavior
     const queryClient = new QueryClient();
     queryClient.setQueryData(['candidates', '1'], candidates);
-  
+
     // Render hook with the provider
     const { result } = renderHook(() => useDragAndDropContext(), {
       wrapper: ({ children }) => (
         <QueryClientProvider client={queryClient}>
-          <DragAndDropProvider jobId="1">{children}</DragAndDropProvider>
+          <DragAndDropProvider jobId='1'>{children}</DragAndDropProvider>
         </QueryClientProvider>
       ),
     });
-  
+
     // Simulate drag start
     act(() => {
       result.current.handleDragStart(
@@ -107,18 +107,18 @@ describe('DragAndDropProvider', () => {
           dataTransfer: { effectAllowed: 'move' },
           target: { setAttribute: vi.fn() },
         } as unknown as React.DragEvent<Element>,
-        candidate
+        candidate,
       );
     });
-  
+
     // Simulate drag over event
     act(() => {
       result.current.handleDragOver(
         { preventDefault: vi.fn(), clientY: 100 } as unknown as React.DragEvent<Element>,
-        'interview'
+        'interview',
       );
     });
-  
+
     // Simulate drop event
     act(() => {
       result.current.handleDrop({ preventDefault: vi.fn() } as unknown as React.DragEvent<Element>);
@@ -126,26 +126,26 @@ describe('DragAndDropProvider', () => {
 
     queryClient.setQueryData<Candidates>(['candidates', '1'], (oldCandidates) => {
       if (!oldCandidates) return undefined;
-  
+
       const updatedCandidate = {
         ...candidate,
         status: 'interview' as Statuses,
         position: 1.5, // Example position for the test
       };
-  
+
       const newCandidates: Candidates = { ...oldCandidates };
       const { id, status } = updatedCandidate;
-  
+
       // Remove candidate from all columns
       Object.keys(newCandidates).forEach((column) => {
         const key = column as keyof typeof newCandidates;
         newCandidates[key] = newCandidates[key].filter((c) => c.id !== id);
       });
-  
+
       newCandidates[status as keyof typeof newCandidates] = newCandidates[status as keyof typeof newCandidates]
         .concat([updatedCandidate])
         .sort((a, b) => a.position - b.position);
-  
+
       return newCandidates;
     });
 
@@ -158,7 +158,7 @@ describe('DragAndDropProvider', () => {
         position: expect.any(Number),
       }),
     });
-  
+
     // Verify the updated state in queryClient
     const updatedCandidates = queryClient.getQueryData(['candidates', '1']);
 
@@ -172,19 +172,19 @@ describe('DragAndDropProvider', () => {
 
   test('handles drag end correctly', () => {
     const { result } = renderHook(() => useDragAndDropContext(), { wrapper: createWrapper() });
-  
+
     // Mock the target element to verify the setAttribute call
     const mockSetAttribute = vi.fn();
     const mockEvent = { target: { setAttribute: mockSetAttribute } } as unknown as React.DragEvent<Element>;
-  
+
     // Trigger the drag end
     act(() => {
       result.current.handleDragEnd(mockEvent);
     });
-  
+
     // Check that draggedCandidate is reset
     expect(result.current.draggedCandidate).toBe(null);
-  
+
     // Check that setAttribute was called with 'aria-grabbed' set to 'false'
     expect(mockSetAttribute).toHaveBeenCalledWith('aria-grabbed', 'false');
   });

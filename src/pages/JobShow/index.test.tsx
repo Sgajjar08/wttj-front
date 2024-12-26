@@ -47,15 +47,13 @@ describe('JobShow Component', () => {
     vi.mocked(useJob).mockReturnValue({
       job: { id: '123', name: 'Software Engineer' },
       isLoading: false,
-      error: false
+      error: false,
     });
 
     // Mock useCandidates
     vi.mocked(useCandidates).mockReturnValue({
       data: {
-        new: [
-          { id: 1, email: 'candidate1@example.com', status: 'new', position: 1 },
-        ],
+        new: [{ id: 1, email: 'candidate1@example.com', status: 'new', position: 1 }],
         interview: [],
         hired: [],
         rejected: [],
@@ -77,10 +75,10 @@ describe('JobShow Component', () => {
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={['/jobs/123']}>
           <Routes>
-            <Route path="/jobs/:jobId" element={<JobShow />} />
+            <Route path='/jobs/:jobId' element={<JobShow />} />
           </Routes>
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
     expect(getByText('Software Engineer')).toBeInTheDocument();

@@ -39,9 +39,7 @@ const CandidateColumn = ({ column }: CandidateColumnProps) => {
       </Flex>
       <Flex direction='column' p={10} pb={0}>
         {candidates &&
-          candidates[column].map((candidate: Candidate) => (
-            <CandidateCard key={candidate.id} candidate={candidate} />
-          ))}
+          candidates[column].map((candidate: Candidate) => <CandidateCard key={candidate.id} candidate={candidate} />)}
       </Flex>
     </Box>
   );

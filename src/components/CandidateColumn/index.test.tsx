@@ -8,14 +8,14 @@ import { Candidates } from '../../types';
 
 describe('CandidateColumn', () => {
   const candidates: Candidates = {
-      new: [
-        { id: 1, email: 'test1@example.com', status: 'new', position: 1 },
-        { id: 2, email: 'test2@example.com', status: 'new', position: 2 },
-      ],
-      interview: [],
-      hired: [],
-      rejected: [],
-    };
+    new: [
+      { id: 1, email: 'test1@example.com', status: 'new', position: 1 },
+      { id: 2, email: 'test2@example.com', status: 'new', position: 2 },
+    ],
+    interview: [],
+    hired: [],
+    rejected: [],
+  };
 
   test('renders column with correct candidate count', () => {
     const candidates: Candidates = {
@@ -32,10 +32,10 @@ describe('CandidateColumn', () => {
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={['/job/1']}>
           <Routes>
-            <Route path="/job/:jobId" element={<CandidateColumn column="new" />} />
+            <Route path='/job/:jobId' element={<CandidateColumn column='new' />} />
           </Routes>
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
     expect(getByText('new')).toBeInTheDocument();
@@ -51,10 +51,10 @@ describe('CandidateColumn', () => {
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={['/job/1']}>
           <Routes>
-            <Route path="/job/:jobId" element={<CandidateColumn column="new" />} />
+            <Route path='/job/:jobId' element={<CandidateColumn column='new' />} />
           </Routes>
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
     expect(getByText('new')).toBeInTheDocument();
