@@ -216,6 +216,60 @@ src/components/Candidate/
 ├── Candidate.types.ts # Types and interfaces specific to Candidate
 ```
 
+---
+
+## Logic implementation
+
+- I have used binary search for new position.
+
+#### findDropPosition
+The findDropPosition function determines the appropriate drop target and position for a card in a column based on the vertical position of the mouse cursor (mouseY). This function uses a binary search algorithm to find the correct insertion point within the list of existing cards in a specific column.
+
+##### Parameters
+mouseY (number): The Y-coordinate of the mouse cursor.
+
+status (Statuses): The status/category of the column in which the drop is taking place.
+
+##### Returns
+An object containing:
+
+targetIndex (number): The index at which the new card should be inserted.
+
+newPosition (number): The new position value for the inserted card.
+
+##### Function Logic
+***1. Initial Checks:***
+
+If candidates is not defined, the function returns { targetIndex: 0, newPosition: 0 }.
+
+Retrieves the list of cards (columnCards) and their positions (cardPositions) for the specified status.
+
+Retrieves DOM elements corresponding to the cards in the column.
+
+***2. Binary Search:***
+
+Initializes low and high pointers for the binary search.
+
+Sets default values for targetIndex and newPosition based on the length of columnCards.
+
+***3. Iteration:***
+
+Iterates while low is less than or equal to high.
+
+Calculates the midpoint (mid) and retrieves the corresponding card's position and middle point (cardMiddle).
+
+Compares mouseY with cardMiddle to determine the position for insertion:
+
+If mouseY is less than cardMiddle, updates targetIndex and calculates newPosition. Adjusts high to narrow the search range.
+
+Otherwise, adjusts low to narrow the search range.
+
+***4. Result:***
+
+Returns the final targetIndex and newPosition.
+
+---
+
 ## What has been implemented?
 ### 1. Basic Functionality
 
@@ -240,6 +294,10 @@ src/components/Candidate/
 - Reasonable usage of external libraries
 - Clear, atomic commits with meaningful messages
 
+---
+
 ## What is remaining?
 
 - **Edge Case**: When a candidate is dragged and dropped to the same position, there is no visible impact on the UI. However, this could result in an unnecessary API call. While this doesn't affect the user experience, it can be optimized to prevent unnecessary backend usage.
+
+---
