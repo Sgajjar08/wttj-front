@@ -149,7 +149,7 @@ If you encounter CORS (Cross-Origin Resource Sharing) errors, you need to add a 
 This project follows a modular and scalable folder structure to ensure maintainability, readability, and ease of development. Below is a breakdown of the folder structure and the design principles followed:
 
 ## Folder Structure
-
+```
 src/
 ├── api/                # Handles API requests and integrations
 ├── components/         # Reusable UI components
@@ -164,6 +164,7 @@ src/
 ├── provider/           # Context providers for global state management
 ├── test/               # Unit and integration tests
 ├── types/              # TypeScript types and interfaces
+```
 
 ## Design Principles
 
@@ -206,8 +207,39 @@ src/
 ## Example Component Structure
 
 For a feature like ⁠ Candidate ⁠:
+
+```
 src/components/Candidate/ 
 ├── Candidate.tsx # Main candidate component 
 ├── Candidate.test.tsx # Test file for the component
 ├── Candidate.styles.ts # Styled components or CSS modules 
 ├── Candidate.types.ts # Types and interfaces specific to Candidate
+```
+
+## What has been implemented?
+### 1. Basic Functionality
+
+- Implement drag-and-drop functionality for cards:
+    - Within the same column
+    - Between different columns
+    - With proper handling of a11y
+- Ensure proper handling of card positioning and ordering
+- Implement real-time synchronization between users
+
+### 2. Performance Optimization
+
+- Centralized cache with optimistic and atomic updates
+- Design for scale (DOM size, minimum re-renders, hours of usage without a reload, …):
+    - handle thousands of candidates per column efficiently
+    - handle hundreds of operations made by concurrent users
+
+### 3. 🧑‍💻 Code Quality & Architecture
+
+- Maintainable code with the use of appropriate design patterns
+- Test suite with high coverage and great balance between unit & integration tests
+- Reasonable usage of external libraries
+- Clear, atomic commits with meaningful messages
+
+## What is remaining?
+
+- **Edge Case**: When a candidate is dragged and dropped to the same position, there is no visible impact on the UI. However, this could result in an unnecessary API call. While this doesn't affect the user experience, it can be optimized to prevent unnecessary backend usage.
