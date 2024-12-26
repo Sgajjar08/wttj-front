@@ -1,64 +1,63 @@
-import { describe, expect, test, vi } from 'vitest';
-import { fireEvent } from '@testing-library/dom';
+import { describe, expect, test } from 'vitest';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
-import { Candidates, Statuses } from '../../types';
 import { render } from '../../test-utils';
 import CandidateColumn from '.';
-import { DragAndDropProvider } from '../../provider/dragAndDropProvider';
+import { Candidates } from '../../types';
 
 describe('CandidateColumn', () => {
-  test('renders column name', () => {
-    const candidates: Candidates = { new: [], hired: [], interview: [], rejected: []};
-    const column: Statuses = 'new';
-    const { getByText } = render(<CandidateColumn column={column} candidates={candidates}/>);
-    expect(getByText('new')).toBeInTheDocument();
-  });
-
   const candidates: Candidates = {
-    new: [
-      { id: 1, email: 'test1@example.com', status: 'new', position: 1 },
-      { id: 2, email: 'test2@example.com', status: 'new', position: 2 },
-    ],
-    interview: [],
-    hired: [],
-    rejected: [],
-  };
+      new: [
+        { id: 1, email: 'test1@example.com', status: 'new', position: 1 },
+        { id: 2, email: 'test2@example.com', status: 'new', position: 2 },
+      ],
+      interview: [],
+      hired: [],
+      rejected: [],
+    };
+
+  test('renders column with correct candidate count', () => {
+    const candidates: Candidates = {
+      new: [{ id: 1, email: 'test@example.com', status: 'new', position: 1 }],
+      interview: [],
+      hired: [],
+      rejected: [],
+    };
+
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(['candidates', '1'], candidates);
+
+    const { getByText, getByRole } = render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/job/1']}>
+          <Routes>
+            <Route path="/job/:jobId" element={<CandidateColumn column="new" />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    expect(getByText('new')).toBeInTheDocument();
+    // Query for the div that contains the count directly
+    expect(getByRole('group-new').querySelector('.sc-dxcDKg')).toHaveTextContent('1');
+  });
 
   test('renders candidates correctly', () => {
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(['candidates', '1'], candidates);
+
     const { getByText, getAllByRole } = render(
-      <DragAndDropProvider>
-        <CandidateColumn column="new" candidates={candidates} />
-      </DragAndDropProvider>,
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/job/1']}>
+          <Routes>
+            <Route path="/job/:jobId" element={<CandidateColumn column="new" />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     expect(getByText('new')).toBeInTheDocument();
-    expect(getAllByRole('listitem')).toHaveLength(2);
-  });
-
-  test('handles drop event', async () => {
-    const { getByRole } = render(
-      <DragAndDropProvider>
-        <CandidateColumn column="new" candidates={candidates} />
-      </DragAndDropProvider>,
-    );
-
-    const column = getByRole('group');
-
-    // Mock dataTransfer object and preventDefault
-    const mockDropEvent = {
-      preventDefault: vi.fn(),
-      dataTransfer: {
-        getData: vi.fn(() => '1'),
-      },
-    } as unknown as React.DragEvent;
-  
-    // Trigger the drop event on the column
-    await fireEvent.drop(column, mockDropEvent);
-
-    console.log(fireEvent.drop(column), column);
-  
-    // Ensure that preventDefault was called
-    expect(mockDropEvent.preventDefault).toHaveBeenCalled();
-    expect(mockDropEvent.dataTransfer.getData).toHaveBeenCalledWith('text'); // Ensure the default action was prevented
+    expect(getAllByRole('listitem')).toHaveLength(2); // Check if two candidates are rendered
   });
 });

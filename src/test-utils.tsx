@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { render, RenderOptions } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { DragAndDropProvider } from './provider/dragAndDropProvider';
+
 type AllTheProvidersProps = PropsWithChildren;
 
 const theme = createTheme();
@@ -20,7 +22,11 @@ export const AllTheProviders: FC<AllTheProvidersProps> = ({ children }) => {
 
   return (
     <QueryClientProvider client={queryClientTest}>
-      <WuiProvider theme={theme}>{children}</WuiProvider>
+      <WuiProvider theme={theme}>
+        <DragAndDropProvider>
+          {children}
+        </DragAndDropProvider>
+      </WuiProvider>
     </QueryClientProvider>
   );
 };
