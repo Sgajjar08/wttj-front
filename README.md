@@ -144,4 +144,70 @@ If you encounter CORS (Cross-Origin Resource Sharing) errors, you need to add a 
 
 ---
 
-Enjoy working with the WTTJ Front repository!
+# Design Patterns and Folder Structure
+
+This project follows a modular and scalable folder structure to ensure maintainability, readability, and ease of development. Below is a breakdown of the folder structure and the design principles followed:
+
+## Folder Structure
+
+src/
+├── api/                # Handles API requests and integrations
+├── components/         # Reusable UI components
+│   ├── Candidate/      # Components related to candidate features
+│   ├── CandidateColumn/ # Column-specific candidate-related components
+│   ├── Layout/         # Layout-related components for the application
+├── constants/          # Application-wide constants (e.g., enums, keys, static data)
+├── hooks/              # Custom React hooks for shared logic
+├── pages/              # Page-level components for routing
+│   ├── JobIndex/       # Job index page
+│   ├── JobShow/        # Job details page
+├── provider/           # Context providers for global state management
+├── test/               # Unit and integration tests
+├── types/              # TypeScript types and interfaces
+
+## Design Principles
+
+### 1. *Component Modularity*
+   - All components are grouped by feature or functionality.
+   - Ensures that related components are colocated, making the codebase more intuitive and easier to navigate.
+
+### 2. *Separation of Concerns*
+   - Pages (⁠ src/pages ⁠) handle routing and high-level rendering logic.
+   - Reusable components (⁠ src/components ⁠) focus solely on UI and are unaware of the application's business logic.
+   - Business logic is handled via hooks and API calls.
+
+### 3. *Scalability*
+   - The folder structure is designed to support new features by simply adding corresponding folders under ⁠ components ⁠, ⁠ pages ⁠, or other appropriate directories.
+   - Encourages reusability and ease of scaling.
+
+### 4. *State Management*
+   - Global state is managed via React Context or a dedicated provider under ⁠ src/provider ⁠.
+   - Local state is encapsulated within individual components or handled via custom hooks.
+
+### 5. *API Layer*
+   - All API integrations are centralized in the ⁠ src/api ⁠ folder.
+   - This ensures that changes in API structure or external services can be handled in one place.
+
+### 6. *Typescript Integration*
+   - All types and interfaces are stored in ⁠ src/types ⁠, promoting type safety across the application.
+   - This ensures code clarity and reduces runtime errors.
+
+### 7. *Testing*
+   - All tests are colocated in the ⁠ src/test ⁠ folder.
+   - Encourages a clear boundary between application logic and test code, while maintaining ease of testing.
+
+## Best Practices
+
+•⁠  ⁠*Consistency:* Adhere to common naming conventions for files and folders. Use PascalCase for components and camelCase for variables and functions.
+•⁠  ⁠*Reusability:* Extract shared logic into custom hooks (⁠ src/hooks ⁠) or utility functions.
+•⁠  ⁠*Readability:* Keep components small and focused. Break down larger components into smaller, reusable pieces when possible.
+•⁠  ⁠*Documentation:* Document the purpose and usage of custom hooks, providers, and reusable components in their respective files.
+
+## Example Component Structure
+
+For a feature like ⁠ Candidate ⁠:
+src/components/Candidate/ 
+├── Candidate.tsx # Main candidate component 
+├── Candidate.test.tsx # Test file for the component
+├── Candidate.styles.ts # Styled components or CSS modules 
+├── Candidate.types.ts # Types and interfaces specific to Candidate

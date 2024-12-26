@@ -20,24 +20,30 @@ function JobShow() {
   useWebSocketForCandidates(jobId);
 
   if (isLoading) {
-    return <Loader color='primary-40' />;
+    return <Flex justifyContent='center' h='100vh' alignItems='center'>
+      <Loader color='primary-40' />
+    </Flex>;
   }
 
   if (isError) {
     return (
-      <Alert variant='danger'>
-        <Alert.Title>Fetching Error</Alert.Title>
-        'Something went wrong. Please try again later.'
-      </Alert>
+      <Flex justifyContent='center' h='100vh' alignItems='center'>
+        <Alert variant='danger'>
+          <Alert.Title>Fetching Error</Alert.Title>
+          'Something went wrong. Please try again later.'
+        </Alert>
+      </Flex>
     );
   }
 
   if (!candidates) {
     return (
-      <Alert>
-        <Alert.Title>No candidates available</Alert.Title>
-        'Please try again later.'
-      </Alert>
+      <Flex justifyContent='center' h='100vh' alignItems='center'>
+        <Alert>
+          <Alert.Title>No candidates available</Alert.Title>
+          'Please try again later.'
+        </Alert>
+      </Flex>
     );
   }
 

@@ -1,6 +1,7 @@
 import { Link as RouterLink } from 'react-router-dom';
 
 import { Link } from '@welcome-ui/link';
+import { Flex } from '@welcome-ui/flex';
 import { WelcomeLoader } from '@welcome-ui/welcome-loader';
 
 import { useJobs } from '../../hooks';
@@ -9,7 +10,9 @@ function JobIndex() {
   const { isLoading, jobs } = useJobs();
 
   if (isLoading) {
-    return <WelcomeLoader />;
+    return <Flex justifyContent='center' h='100vh' alignItems='center'>
+      <WelcomeLoader />
+      </Flex>;
   }
 
   return (
