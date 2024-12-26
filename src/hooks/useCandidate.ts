@@ -7,7 +7,8 @@ import { Candidate, Candidates } from '../types';
 import { COLUMNS } from '../constants';
 
 export const useCandidates = (jobId?: string) => {
-  return useQuery(['candidates', jobId], () => getCandidates(jobId as string), { enabled: !!jobId });
+  const {data, isError, isLoading} = useQuery(['candidates', jobId], () => getCandidates(jobId as string), { enabled: !!jobId });
+  return { data, isError, isLoading};
 };
 
 export const useUpdateCandidate = (jobId?: string) => {

@@ -13,7 +13,7 @@ interface CandidateColumnProps {
 }
 
 const CandidateColumn = ({ column, candidates }: CandidateColumnProps) => {
-  const { handleDrop } = useDragAndDropContext();
+  const { handleDrop, handleDragOver } = useDragAndDropContext();
 
   return (
     <Box
@@ -23,8 +23,9 @@ const CandidateColumn = ({ column, candidates }: CandidateColumnProps) => {
       borderColor='neutral-30'
       borderRadius='md'
       overflow='hidden'
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => handleDrop(e, candidates, column)}>
+      role={`group-${column}`}
+      onDragOver={(e) => handleDragOver(e, column)}
+      onDrop={(e) => handleDrop(e)}>
       <Flex p={10} borderBottom={1} borderColor='neutral-30' alignItems='center' justify='space-between'>
         <Text variant='h5' color='black' m={0} textTransform='capitalize'>
           {column}
@@ -33,8 +34,8 @@ const CandidateColumn = ({ column, candidates }: CandidateColumnProps) => {
       </Flex>
       <Flex direction='column' p={10} pb={0}>
         {candidates &&
-          candidates[column].map((candidate: Candidate, index: number) => (
-            <CandidateCard key={candidate.id} candidate={candidate} index={index} />
+          candidates[column].map((candidate: Candidate) => (
+            <CandidateCard key={candidate.id} candidate={candidate} />
           ))}
       </Flex>
     </Box>

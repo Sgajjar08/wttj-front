@@ -42,14 +42,14 @@ function JobShow() {
   }
 
   return (
-    <DragAndDropProvider jobId={jobId}>
+    <DragAndDropProvider jobId={jobId} candidates={candidates}>
       <Box backgroundColor='neutral-70' p={20} alignItems='center'>
         <Text variant='h5' color='white' m={0}>
           {job?.name}
         </Text>
       </Box>
 
-      <Box p={20}>
+      <Box p={20} role='status'>
         <Flex gap={10} justifyContent='center'>
           {COLUMNS.map((column) => (
             <CandidateColumn key={column} column={column} candidates={candidates} />

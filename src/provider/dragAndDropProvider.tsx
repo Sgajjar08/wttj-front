@@ -5,16 +5,14 @@ import { useUpdateCandidate } from '../hooks/useCandidate';
 
 interface DragAndDropContextProps {
     draggedCandidate: Candidate | null;
-    hoverIndex: string | null;
     handleDragStart: (e: React.DragEvent<Element>, candidate: Candidate) => void;
-    handleDragOver: (e: React.DragEvent, targetIndex: string) => void;
-    handleDrop: (e: React.DragEvent<Element>, candidates: Candidates, targetColumn: Statuses) => void;
+    handleDragOver: (e: React.DragEvent, targetStatus: Statuses) => void;
+    handleDrop: (e: React.DragEvent<Element>) => void;
     handleDragEnd: (e: React.DragEvent<Element>) => void;
 }
 
 const DragAndDropContext = createContext<DragAndDropContextProps>({
     draggedCandidate: null,
-    hoverIndex: null,
     handleDragStart: () => { },
     handleDragOver: () => { },
     handleDrop: () => { },
@@ -24,12 +22,17 @@ const DragAndDropContext = createContext<DragAndDropContextProps>({
 interface DragAndDropProviderProps {
     children: ReactNode;
     jobId?: string;
+    candidates: Candidates
 }
 
-export const DragAndDropProvider: React.FC<DragAndDropProviderProps> = ({ children, jobId }) => {
+export const DragAndDropProvider: React.FC<DragAndDropProviderProps> = ({ children, jobId, candidates }) => {
     const { mutate: updateCandidateMutation } = useUpdateCandidate(jobId);
     const [draggedCandidate, setDraggedCandidate] = useState<Candidate | null>(null);
-    const [hoverIndex, setHoverIndex] = useState<string | null>(null);
+    const [dropTarget, setDropTarget] = useState<{
+        targetStatus: Statuses;
+        index: number;
+        newPosition: number;
+    } | null>(null);
 
     const handleDragStart = useCallback((e: React.DragEvent<Element>, candidate: Candidate) => {
         e.dataTransfer.effectAllowed = 'move';
@@ -37,48 +40,117 @@ export const DragAndDropProvider: React.FC<DragAndDropProviderProps> = ({ childr
         (e.target as HTMLElement).setAttribute('aria-grabbed', 'true');
     }, []);
 
-    const handleDragOver = useCallback(
-        (e: React.DragEvent, targetIndex: string) => {
-            e.preventDefault();
-            if (!draggedCandidate) return;
-            setHoverIndex(targetIndex);
+    // Precompute positions for binary search
+    const getCardPositions = useCallback(
+        (columnId: Statuses) => {
+            if(!candidates) return;
+            return candidates[columnId].map((card) => card.position);
         },
-        [draggedCandidate],
+        [candidates]
+    );
+
+    // Binary Search to Find Drop Target
+    const findDropPosition = (mouseY: number, status: Statuses) => {
+        if (!candidates) return { targetIndex: 0, newPosition: 0 };
+
+        const columnCards = candidates[status];
+        const cardPositions = getCardPositions(status);
+        const cardElements = Array.from(
+            document.querySelectorAll(
+                `[role="group-${status}"] [role="listitem"]`
+            )
+        );
+
+        if (!cardPositions) return { targetIndex: 0, newPosition: 0 };;
+
+        let low = 0;
+        let high = cardPositions.length - 1;
+        let targetIndex = columnCards.length;
+        let newPosition =
+            columnCards.length > 0 ? cardPositions[cardPositions.length - 1] + 1 : 1;
+
+        while (low <= high) {
+            const mid = Math.floor((low + high) / 2);
+            const cardRect = cardElements[mid]?.getBoundingClientRect();
+            const cardMiddle = cardRect.top + cardRect.height / 2;
+
+            if (mouseY < cardMiddle) {
+                targetIndex = mid;
+                if (mid === 0) {
+                    newPosition = cardPositions[0] / 2;
+                } else {
+                    newPosition = (cardPositions[mid - 1] + cardPositions[mid]) / 2;
+                }
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        return { targetIndex, newPosition };
+    };
+
+    const handleDragOver = useCallback(
+        (e: React.DragEvent, status: Statuses) => {
+            e.preventDefault();
+            const { clientY } = e;
+            const { targetIndex, newPosition } = findDropPosition(clientY, status);
+            setDropTarget({ targetStatus: status, index: targetIndex, newPosition });
+        },
+        [findDropPosition]
     );
 
     const handleDrop = useCallback(
-        (e: React.DragEvent<Element>, candidates: Candidates, targetColumn: Statuses) => {
+        (e: React.DragEvent<Element>) => {
             e.preventDefault();
+            if (!draggedCandidate || !dropTarget || !candidates) return;
 
-            if (!draggedCandidate || !candidates || !targetColumn || !hoverIndex) return;
+            const { id, status: sourceStatus } = draggedCandidate;
+            const {
+              targetStatus: targetStatus,
+              index: targetIndex,
+              newPosition,
+            } = dropTarget;
 
-            const hoverCandidate = candidates[targetColumn][Number(hoverIndex)];
-if (hoverCandidate && hoverCandidate.position < draggedCandidate.position) {
-                    draggedCandidate.position = hoverCandidate.position - 1;
-                }
-                
+            const updatedCandidates = { ...candidates };
+            const sourceCards = updatedCandidates[sourceStatus];
+            const targetCards = updatedCandidates[targetStatus];
+            const cardIndex = sourceCards.findIndex((c) => c.id === id);
+            const card = sourceCards[cardIndex];
+
+            if (sourceStatus === targetStatus) {
+                // Same column: adjust position
+                sourceCards.splice(cardIndex, 1);
+                card.position = newPosition;
+                sourceCards.splice(targetIndex, 0, card);
+              } else {
+                // Move to a different column
+                sourceCards.splice(cardIndex, 1);
+                card.position = newPosition;
+                targetCards.splice(targetIndex, 0, card);
+              }
+
             updateCandidateMutation({
-                    jobId: jobId,
-                    candidate: { ...draggedCandidate, status: targetColumn },
-                });
-            
+                jobId: jobId,
+                candidate: { ...card, status: targetStatus },
+            });
+
             setDraggedCandidate(null);
-            setHoverIndex(null);
+            setDropTarget(null);
         },
-        [updateCandidateMutation, draggedCandidate, hoverIndex, jobId],
+        [updateCandidateMutation, draggedCandidate, jobId, dropTarget],
     );
 
     const handleDragEnd = useCallback((e: React.DragEvent<Element>) => {
         (e.target as HTMLElement).setAttribute('aria-grabbed', 'false');
         setDraggedCandidate(null);
-        setHoverIndex(null);
+        setDropTarget(null);
     }, []);
 
     return (
         <DragAndDropContext.Provider
             value={{
                 draggedCandidate,
-                hoverIndex,
                 handleDragStart,
                 handleDragOver,
                 handleDrop,
